@@ -1,4 +1,4 @@
-#--------------------------------------------------------------------
+inde#--------------------------------------------------------------------
 # Makefile for Assignment 4, Part 1
 # rules to build bdt{Good,Bad}*.o from source will fail
 # Author: Christopher Moretti
