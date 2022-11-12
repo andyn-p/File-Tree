@@ -132,6 +132,13 @@ the error manifests itself or is "noticed" by the client.
 What are your critiques of the given DT implementations, as
 specified in Step 2.5?
 
+In nodeDTGood.c, the parameter ulIndex doesn't seem to make sense since
+adding it into the DynArray of children means sorting into the DynArray,
+meaning the index at which it is inserted (if inserted in lexicographic
+order) might be different than the index originally given by the ulIndex
+parameter.
 
+DT_insert is too long, should modularize the method to use more modular
+functions.
 
 ------------------------------------------------------------------------

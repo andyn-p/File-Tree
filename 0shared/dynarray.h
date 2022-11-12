@@ -107,7 +107,7 @@ void DynArray_sort(DynArray_T oDynArray,
    *pfCompare must return 0 if *pvElement1 is equal to pvElement2,
    and non-0 otherwise. */
 
-int DynArray_search(DynArray_T oDynArray, 
+int DynArray_search(DynArray_T oDynArray,
                     void *pvSoughtElement,
                     size_t *puIndex,
                     int (*pfCompare)(const void *pvElement1,
@@ -123,7 +123,7 @@ int DynArray_search(DynArray_T oDynArray,
    equal to, or greater than *pvElement2.
    oDynArray must be sorted as determined by *pfCompare. */
 
-int DynArray_bsearch(DynArray_T oDynArray, 
+int DynArray_bsearch(DynArray_T oDynArray,
                      void *pvSoughtElement,
                      size_t *puIndex,
                      int (*pfCompare)(const void *pvElement1,
