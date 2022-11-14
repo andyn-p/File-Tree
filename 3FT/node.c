@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "node.h"
 #include "dynarray.h"
@@ -54,7 +55,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
    int iStatus;
 
    assert(oPPath != NULL);
-   assert(oNParent == NULL || CheckerDT_Node_isValid(oNParent));
+   assert(oNParent == NULL || CheckerFT_Node_isValid(oNParent));
 
    /* allocate space for a new node */
    psNew = malloc(sizeof(struct node));
@@ -97,7 +98,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       }
 
       /* parent must not already have child with this path */
-      if(oNParent->isDir && Node_hasChild(oNParent, oPPath, &ulIndex)) {
+      if(Node_hasChild(oNParent, oPPath, &ulIndex)) {
          Path_free(psNew->oPPath);
          free(psNew);
          *poNResult = NULL;
@@ -134,7 +135,9 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       if (contents != NULL) {
          psNew->contents = (void *)malloc(ulLength);
          if (psNew->contents == NULL) {
+            Path_free(psNew->oPPath);
             free(psNew);
+            *poNResult = NULL;
             return MEMORY_ERROR;
          }
          strcpy(psNew->contents, contents);
@@ -157,8 +160,8 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
 
    *poNResult = psNew;
 
-   assert(oNParent == NULL || CheckerDT_Node_isValid(oNParent));
-   assert(CheckerDT_Node_isValid(*poNResult));
+   assert(oNParent == NULL || CheckerFT_Node_isValid(oNParent));
+   assert(CheckerFT_Node_isValid(*poNResult));
    return SUCCESS;
 }
 
@@ -167,7 +170,8 @@ size_t Node_free(Node_T oNNode) {
    size_t ulCount = 0;
 
    assert(oNNode != NULL);
-   assert(CheckerDT_Node_isValid(oNNode));
+   fprintf(stderr, "starting: %s\n", Path_getPathname(oNNode->oPPath));
+   assert(CheckerFT_Node_isValid(oNNode));
 
    /* remove from parent's list */
    if(oNNode->oNParent != NULL) {
