@@ -99,7 +99,8 @@ void *Node_getContents(Node_T oNNode);
 /*
   Replaces the contents of a file with pvContents
 */
-void *Node_replaceContents(Node_T oNNode, void *pvContents);
+void *Node_replaceContents(Node_T oNNode, void *pvContents,
+   size_t ulNewLength);
 
 /*
   Returns file content length of a file

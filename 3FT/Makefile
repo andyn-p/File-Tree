@@ -20,7 +20,7 @@ clean:
 clobber: clean
 	rm -f dynarray.o path.o ft_client.o node.o ft.o *~
 
-ft: dynarray.o path.o node.o ft.o ft_client.o
+ft: dynarray.o checker.o path.o node.o ft.o ft_client.o
 	$(GCC) -g $^ -o $@
 
 dynarray.o: dynarray.c dynarray.h
@@ -32,9 +32,12 @@ path.o: path.c path.h
 ft_client.o: ft_client.c ft.h a4def.h
 	$(GCC) -g -c $<
 
-node.o: node.c dynarray.h node.h path.h a4def.h
+checker.o: checker.c dynarray.h checker.h node.h path.h a4def.h
 	$(GCC) -g -c $<
 
-ft.o: ft.c dynarray.h node.h ft.h path.h a4def.h
+node.o: node.c dynarray.h checker.h node.h path.h a4def.h
+	$(GCC) -g -c $<
+
+ft.o: ft.c dynarray.h checker.h node.h ft.h path.h a4def.h
 	$(GCC) -g -c $<
 

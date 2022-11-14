@@ -8,6 +8,7 @@
 #include "ft.h"
 #include "node.h"
 #include "dynarray.h"
+#include "checker.h"
 
 /* 1. a flag for being in an initialized state (TRUE) or not (FALSE) */
 static boolean bIsInitialized;
@@ -163,7 +164,7 @@ int FT_insertDir(const char *pcPath) {
       return iStatus;
 
    /* find the closest ancestor of oPPath already in the tree */
-   iStatus= DT_traversePath(oPPath, &oNCurr);
+   iStatus = DT_traversePath(oPPath, &oNCurr);
    if(iStatus != SUCCESS)
    {
       Path_free(oPPath);
@@ -205,8 +206,14 @@ int FT_insertDir(const char *pcPath) {
          return iStatus;
       }
 
+      /* ensure that current level is not a file */
+      if (ulIndex == ulDepth && oNRoot != NULL &&
+            !Node_isDirectory(oNCurr)) {
+         return NOT_A_DIRECTORY;
+      }
+
       /* insert the new node for this level */
-      iStatus = Node_new(oPPrefix, oNCurr, TRUE, FALSE, 0, &oNNewNode);
+      iStatus = Node_new(oPPrefix, oNCurr, TRUE, NULL, 0, &oNNewNode);
       if(iStatus != SUCCESS) {
          Path_free(oPPath);
          Path_free(oPPrefix);
@@ -240,7 +247,7 @@ boolean FT_containsDir(const char *pcPath) {
    assert(pcPath != NULL);
 
    iStatus = DT_findNode(pcPath, &oNFound);
-   if (!Node_isDirectory(oNFound)) {
+   if (oNFound != NULL && !Node_isDirectory(oNFound)) {
       iStatus = NOT_A_DIRECTORY;
       oNFound = NULL;
    }
@@ -255,7 +262,7 @@ int FT_rmDir(const char *pcPath) {
 
    iStatus = DT_findNode(pcPath, &oNFound);
 
-   if (!Node_isDirectory(oNFound))
+   if (oNFound != NULL && !Node_isDirectory(oNFound))
       return NOT_A_DIRECTORY;
 
    if (iStatus != SUCCESS)
@@ -288,12 +295,16 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
       return iStatus;
 
    /* find the closest ancestor of oPPath already in the tree */
-   iStatus= DT_traversePath(oPPath, &oNCurr);
+   iStatus = DT_traversePath(oPPath, &oNCurr);
    if(iStatus != SUCCESS)
    {
       Path_free(oPPath);
       return iStatus;
    }
+
+   /* validate that root dir has been initialized */
+   if (oNRoot == NULL)
+      return CONFLICTING_PATH;
 
    /* no ancestor node found, so if root is not NULL,
       pcPath isn't underneath root. */
@@ -331,8 +342,15 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
       }
 
       /* insert the new node for this level */
-      iStatus = Node_new(oPPrefix, oNCurr, FALSE, pvContents, ulLength,
-         &oNNewNode);
+      if (ulIndex < ulDepth) {
+         iStatus = Node_new(oPPrefix, oNCurr, TRUE, NULL, 0,
+            &oNNewNode);
+      } else if (!Node_isDirectory(oNCurr)) {
+         return NOT_A_DIRECTORY;
+      } else {
+         iStatus = Node_new(oPPrefix, oNCurr, FALSE, pvContents,
+            ulLength, &oNNewNode);
+      }
       if(iStatus != SUCCESS) {
          Path_free(oPPath);
          Path_free(oPPrefix);
@@ -366,7 +384,7 @@ boolean FT_containsFile(const char *pcPath) {
    assert(pcPath != NULL);
 
    iStatus = DT_findNode(pcPath, &oNFound);
-   if (Node_isDirectory(oNFound)) {
+   if (oNFound != NULL && Node_isDirectory(oNFound)) {
       iStatus = NOT_A_FILE;
       oNFound = NULL;
    }
@@ -382,7 +400,7 @@ int FT_rmFile(const char *pcPath) {
 
    iStatus = DT_findNode(pcPath, &oNFound);
 
-   if (Node_isDirectory(oNFound))
+   if (oNFound != NULL && Node_isDirectory(oNFound))
       return NOT_A_FILE;
 
    if (iStatus != SUCCESS)
@@ -421,7 +439,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
    if (iStatus != SUCCESS || Node_isDirectory(oNFound))
        return NULL;
 
-   return Node_replaceContents(oNFound, pvNewContents);
+   return Node_replaceContents(oNFound, pvNewContents, ulNewLength);
 }
 
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {

@@ -39,7 +39,7 @@ size_t Node_free(Node_T oNNode);
 Path_T Node_getPath(Node_T oNNode);
 
 /*
-  Returns TRUE if oNParent has a child with path oPPath. Returns
+Returns TRUE if oNParent has a child with path oPPath. Returns
   FALSE if it does not.
 
   If oNParent has such a child, stores in *pulChildID the child's

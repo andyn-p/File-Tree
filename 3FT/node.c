@@ -4,6 +4,7 @@
 
 #include "node.h"
 #include "dynarray.h"
+#include "checker.h"
 
 struct node {
     Path_T   oPPath;   /* node's path */
@@ -53,7 +54,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
    int iStatus;
 
    assert(oPPath != NULL);
-   assert(oNParent == NULL);
+   assert(oNParent == NULL || CheckerDT_Node_isValid(oNParent));
 
    /* allocate space for a new node */
    psNew = malloc(sizeof(struct node));
@@ -96,7 +97,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       }
 
       /* parent must not already have child with this path */
-      if(Node_hasChild(oNParent, oPPath, &ulIndex)) {
+      if(oNParent->isDir && Node_hasChild(oNParent, oPPath, &ulIndex)) {
          Path_free(psNew->oPPath);
          free(psNew);
          *poNResult = NULL;
@@ -130,7 +131,16 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
 
    /* if is file */
    else {
-      psNew->contents = contents;
+      if (contents != NULL) {
+         psNew->contents = (void *)malloc(ulLength);
+         if (psNew->contents == NULL) {
+            free(psNew);
+            return MEMORY_ERROR;
+         }
+         strcpy(psNew->contents, contents);
+      } else {
+         psNew->contents = contents;
+      }
       psNew->ulLength = ulLength;
    }
 
@@ -147,7 +157,8 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
 
    *poNResult = psNew;
 
-   assert(oNParent == NULL);
+   assert(oNParent == NULL || CheckerDT_Node_isValid(oNParent));
+   assert(CheckerDT_Node_isValid(*poNResult));
    return SUCCESS;
 }
 
@@ -156,6 +167,7 @@ size_t Node_free(Node_T oNNode) {
    size_t ulCount = 0;
 
    assert(oNNode != NULL);
+   assert(CheckerDT_Node_isValid(oNNode));
 
    /* remove from parent's list */
    if(oNNode->oNParent != NULL) {
@@ -268,10 +280,26 @@ void *Node_getContents(Node_T oNNode) {
    return oNNode->contents;
 }
 
-void *Node_replaceContents(Node_T oNNode, void *pvContents) {
-   void *oldContents = oNNode->contents;
-   free(oNNode->contents);
-   oNNode->contents = pvContents;
+void *Node_replaceContents(Node_T oNNode, void *pvContents,
+      size_t ulNewLength) {
+   void *oldContents = (void *)malloc(oNNode->ulLength);
+   strcpy(oldContents, oNNode->contents);
+
+   if (oNNode->contents == NULL) {
+      oNNode->contents = (void *)malloc(ulNewLength);
+      if (oNNode->contents == NULL) {
+         return NULL;
+      }
+      strcpy(oNNode->contents, pvContents);
+   } else {
+      free(oNNode->contents);
+      oNNode->contents = (void *)malloc(ulNewLength);
+      if (oNNode->contents == NULL) {
+         return NULL;
+      }
+      strcpy(oNNode->contents, pvContents);
+   }
+   oNNode->ulLength = ulNewLength;
    return oldContents;
 }
 
