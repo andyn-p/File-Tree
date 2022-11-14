@@ -6,28 +6,12 @@
 #include "dynarray.h"
 
 struct node {
-    Path_T   oPPath;   // node's path
-    Node_T   oNParent; // node parent
-    boolean  isDir;    // boolean of if node is dir, else is file
-    size_t   ulLength; // length of file contents if is file
-    void    *contents; // either children of dir, or contents of file
+    Path_T   oPPath;   /* node's path */
+    Node_T   oNParent; /* node parent */
+    boolean  isDir;    /* boolean of if node is dir, else is file */
+    size_t   ulLength; /* length of file contents if is file */
+    void    *contents; /* either children of dir, or contents of file */
 };
-
-/*
-  Links new child oNChild into oNParent's children array at index
-  ulIndex. Returns SUCCESS if the new child was added successfully,
-  or  MEMORY_ERROR if allocation fails adding oNChild to the array.
-*/
-static int Node_addContents(Node_T oNParent, Node_T oNChild,
-                         size_t ulIndex) {
-   assert(oNParent != NULL);
-   assert(oNChild != NULL);
-
-   if(DynArray_addAt(oNParent->contents, ulIndex, oNChild))
-      return SUCCESS;
-   else
-      return MEMORY_ERROR;
-}
 
 /*
   Compares the string representation of oNfirst with a string
@@ -43,6 +27,22 @@ static int Node_compareString(const Node_T oNFirst,
    return Path_compareString(oNFirst->oPPath, pcSecond);
 }
 
+/*
+  Links new child oNChild into oNParent's children array at index
+  ulIndex. Returns SUCCESS if the new child was added successfully,
+  or  MEMORY_ERROR if allocation fails adding oNChild to the array.
+*/
+static int Node_addChild(Node_T oNParent, Node_T oNChild,
+                         size_t ulIndex) {
+   assert(oNParent != NULL);
+   assert(oNChild != NULL);
+
+   if(DynArray_addAt(oNParent->contents, ulIndex, oNChild))
+      return SUCCESS;
+   else
+      return MEMORY_ERROR;
+}
+
 int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       void *contents, size_t ulLength, Node_T *poNResult) {
    struct node *psNew;
@@ -53,7 +53,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
    int iStatus;
 
    assert(oPPath != NULL);
-   assert(oNParent == NULL || CheckerDT_Node_isValid(oNParent));
+   assert(oNParent == NULL);
 
    /* allocate space for a new node */
    psNew = malloc(sizeof(struct node));

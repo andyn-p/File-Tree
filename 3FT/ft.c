@@ -395,7 +395,7 @@ int FT_rmFile(const char *pcPath) {
    return SUCCESS;
 }
 
-void *Ft_getFileContents(const char *pcPath) {
+void *FT_getFileContents(const char *pcPath) {
    int iStatus;
    Node_T oNFound = NULL;
 
@@ -403,11 +403,8 @@ void *Ft_getFileContents(const char *pcPath) {
 
    iStatus = DT_findNode(pcPath, &oNFound);
 
-   if (Node_isDirectory(oNFound))
-      return NOT_A_FILE;
-
-   if (iStatus != SUCCESS)
-       return iStatus;
+   if (iStatus != SUCCESS || Node_isDirectory(oNFound))
+      return NULL;
 
    return Node_getContents(oNFound);
 }
@@ -416,17 +413,13 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
     size_t ulNewLength) {
    int iStatus;
    Node_T oNFound = NULL;
-   void *oldContents = NULL;
 
    assert(pcPath != NULL);
 
    iStatus = DT_findNode(pcPath, &oNFound);
 
-   if (Node_isDirectory(oNFound))
-      return NOT_A_FILE;
-
-   if (iStatus != SUCCESS)
-       return iStatus;
+   if (iStatus != SUCCESS || Node_isDirectory(oNFound))
+       return NULL;
 
    return Node_replaceContents(oNFound, pvNewContents);
 }
@@ -443,7 +436,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
       return iStatus;
 
    /* is file */
-   if ((pbIsFile = !Node_isDirectory(oNFound))) {
+   if ((*pbIsFile = !Node_isDirectory(oNFound))) {
       *pulSize = Node_getContentLength(oNFound);
    }
 

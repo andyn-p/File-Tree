@@ -20,7 +20,7 @@ clean:
 clobber: clean
 	rm -f dynarray.o path.o ft_client.o node.o ft.o *~
 
-ft%: dynarray.o path.o node%.o ft%.o ft_client.o
+ft: dynarray.o path.o node.o ft.o ft_client.o
 	$(GCC) -g $^ -o $@
 
 dynarray.o: dynarray.c dynarray.h

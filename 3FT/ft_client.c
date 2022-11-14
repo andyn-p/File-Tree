@@ -27,6 +27,7 @@ int main(void) {
      * toString should return NULL.
   */
   assert(FT_insertDir("1root/2child/3gkid") == INITIALIZATION_ERROR);
+  putchar('a');
   assert(FT_containsDir("1root/2child/3gkid") == FALSE);
   assert(FT_rmDir("1root/2child/3gkid") == INITIALIZATION_ERROR);
   assert(FT_insertFile("1root/2child/3gkid/4ggk",NULL,0) ==
