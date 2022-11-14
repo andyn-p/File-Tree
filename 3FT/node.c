@@ -39,8 +39,12 @@ static int Node_addChild(Node_T oNParent, Node_T oNChild,
    assert(oNParent != NULL);
    assert(oNChild != NULL);
 
-   if(DynArray_addAt(oNParent->contents, ulIndex, oNChild))
+   if(DynArray_addAt(oNParent->contents, ulIndex, oNChild)) {
+      /* THIS DOESNT WORK FOR SOME REASON*/
+      DynArray_sort(oNParent->contents,
+            (int (*)(const void *, const void *)) Node_compare);
       return SUCCESS;
+   }
    else
       return MEMORY_ERROR;
 }
@@ -256,10 +260,10 @@ int Node_compare(Node_T oNFirst, Node_T oNSecond) {
    assert(oNSecond != NULL);
 
    /* TODO: FIX IF BROKE */
-   if (oNFirst->isDir > oNSecond->isDir) {
-      return oNFirst->isDir;
-   } else if (oNFirst->isDir < oNSecond->isDir) {
-      return -oNSecond->isDir;
+   if (oNFirst->isDir && !oNSecond->isDir) {
+      return 1;
+   } else if (!oNFirst->isDir && oNSecond->isDir) {
+      return -1;
    }
    return Path_comparePath(oNFirst->oPPath, oNSecond->oPPath);
 }
