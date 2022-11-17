@@ -8,11 +8,11 @@
 #include "checker.h"
 
 struct node {
-    Path_T   oPPath;   /* node's path */
-    Node_T   oNParent; /* node parent */
-    boolean  isDir;    /* boolean of if node is dir, else is file */
-    size_t   ulLength; /* length of file contents if is file */
-    void    *contents; /* either children of dir, or contents of file */
+   Path_T   oPPath;   /* node's path */
+   Node_T   oNParent; /* node parent */
+   boolean  isDir;    /* boolean of if node is dir, else is file */
+   size_t   ulLength; /* length of file contents if is file */
+   void    *contents; /* either children of dir, or contents of file */
 };
 
 /*
@@ -28,7 +28,7 @@ static int Node_compareDirString(const Node_T oNFirst,
 
    if (oNFirst->isDir)
       return Path_compareString(oNFirst->oPPath, pcSecond);
-   return -1;
+   return 1;
 }
 
 static int Node_compareFileString(const Node_T oNFirst,
@@ -38,7 +38,7 @@ static int Node_compareFileString(const Node_T oNFirst,
 
    if (!oNFirst->isDir)
       return Path_compareString(oNFirst->oPPath, pcSecond);
-   return 1;
+   return -1;
 }
 
 /*
@@ -111,7 +111,8 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       }
 
       /* parent must not already have child with this path */
-      if(Node_hasChild(oNParent, oPPath, &ulIndex, isDir)) {
+      if(Node_hasChild(oNParent, oPPath, &ulIndex, isDir) ||
+            Node_hasChild(oNParent, oPPath, &ulIndex, !isDir)) {
          Path_free(psNew->oPPath);
          free(psNew);
          *poNResult = NULL;

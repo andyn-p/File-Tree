@@ -61,6 +61,7 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
 
    oNCurr = oNRoot;
    ulDepth = Path_getDepth(oPPath);
+
    for(i = 2; i <= ulDepth; i++) {
       iStatus = Path_prefix(oPPath, i, &oPPrefix);
       if(iStatus != SUCCESS) {
@@ -69,7 +70,9 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
       }
       /* check if node is dir, then check its children */
       if(Node_isDirectory(oNCurr) &&
-            Node_hasChild(oNCurr, oPPrefix, &ulChildID, isDir)) {
+         ((i < ulDepth &&
+         Node_hasChild(oNCurr, oPPrefix, &ulChildID, TRUE)) ||
+         Node_hasChild(oNCurr, oPPrefix, &ulChildID, isDir))) {
          /* go to that child and continue with next prefix */
          Path_free(oPPrefix);
          oPPrefix = NULL;
