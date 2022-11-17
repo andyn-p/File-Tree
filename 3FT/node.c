@@ -65,6 +65,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
    Path_T oPNewPath = NULL;
    size_t ulParentDepth;
    size_t ulIndex;
+   size_t ulIndexCopy;
    int iStatus;
 
    assert(oPPath != NULL);
@@ -111,8 +112,14 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       }
 
       /* parent must not already have child with this path */
-      if(Node_hasChild(oNParent, oPPath, &ulIndex, isDir) ||
-            Node_hasChild(oNParent, oPPath, &ulIndex, !isDir)) {
+      if(Node_hasChild(oNParent, oPPath, &ulIndex, isDir)) {
+         Path_free(psNew->oPPath);
+         free(psNew);
+         *poNResult = NULL;
+         return ALREADY_IN_TREE;
+      }
+      ulIndexCopy = ulIndex;
+      if(Node_hasChild(oNParent, oPPath, &ulIndexCopy, !isDir)) {
          Path_free(psNew->oPPath);
          free(psNew);
          *poNResult = NULL;
