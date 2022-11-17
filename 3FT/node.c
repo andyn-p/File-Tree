@@ -21,12 +21,24 @@ struct node {
   Returns <0, 0, or >0 if oNFirst is "less than", "equal to", or
   "greater than" pcSecond, respectively.
 */
-static int Node_compareString(const Node_T oNFirst,
+static int Node_compareDirString(const Node_T oNFirst,
                                  const char *pcSecond) {
    assert(oNFirst != NULL);
    assert(pcSecond != NULL);
 
-   return Path_compareString(oNFirst->oPPath, pcSecond);
+   if (oNFirst->isDir)
+      return Path_compareString(oNFirst->oPPath, pcSecond);
+   return -1;
+}
+
+static int Node_compareFileString(const Node_T oNFirst,
+                                  const char *pcSecond) {
+   assert(oNFirst != NULL);
+   assert(pcSecond != NULL);
+
+   if (!oNFirst->isDir)
+      return Path_compareString(oNFirst->oPPath, pcSecond);
+   return 1;
 }
 
 /*
@@ -40,9 +52,6 @@ static int Node_addChild(Node_T oNParent, Node_T oNChild,
    assert(oNChild != NULL);
 
    if(DynArray_addAt(oNParent->contents, ulIndex, oNChild)) {
-      /* THIS DOESNT WORK FOR SOME REASON*/
-      DynArray_sort(oNParent->contents,
-            (int (*)(const void *, const void *)) Node_compare);
       return SUCCESS;
    }
    else
@@ -102,7 +111,7 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
       }
 
       /* parent must not already have child with this path */
-      if(Node_hasChild(oNParent, oPPath, &ulIndex)) {
+      if(Node_hasChild(oNParent, oPPath, &ulIndex, isDir)) {
          Path_free(psNew->oPPath);
          free(psNew);
          *poNResult = NULL;
@@ -216,15 +225,20 @@ Path_T Node_getPath(Node_T oNNode) {
 }
 
 boolean Node_hasChild(Node_T oNParent, Path_T oPPath,
-                         size_t *pulChildID) {
+                         size_t *pulChildID, boolean isDir) {
    assert(oNParent != NULL);
    assert(oPPath != NULL);
    assert(pulChildID != NULL);
 
    /* *pulChildID is the index into oNParent->oDChildren */
+   if (isDir) {
+      return DynArray_bsearch(oNParent->contents,
+         (char*) Path_getPathname(oPPath), pulChildID,
+         (int (*)(const void*,const void*)) Node_compareDirString);
+   }
    return DynArray_bsearch(oNParent->contents,
-            (char*) Path_getPathname(oPPath), pulChildID,
-            (int (*)(const void*,const void*)) Node_compareString);
+      (char*) Path_getPathname(oPPath), pulChildID,
+      (int (*)(const void*,const void*)) Node_compareFileString);
 }
 
 size_t Node_getNumChildren(Node_T oNParent) {
@@ -259,12 +273,6 @@ int Node_compare(Node_T oNFirst, Node_T oNSecond) {
    assert(oNFirst != NULL);
    assert(oNSecond != NULL);
 
-   /* TODO: FIX IF BROKE */
-   if (oNFirst->isDir && !oNSecond->isDir) {
-      return 1;
-   } else if (!oNFirst->isDir && oNSecond->isDir) {
-      return -1;
-   }
    return Path_comparePath(oNFirst->oPPath, oNSecond->oPPath);
 }
 

@@ -1,2 +1,8 @@
 FIX SORTING ON INSERT
 FIX NULL NODE PROBLEM WHILE DESTROYING NODE
+
+^FIX COMPARING:
+   currently only compares the two path strings, but must also
+   compare the isDir boolean.
+
+   both problems above are effected by this

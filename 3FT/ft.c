@@ -68,7 +68,7 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest) {
       }
       /* check if node is dir, then check its children */
       if(Node_isDirectory(oNCurr) &&
-            Node_hasChild(oNCurr, oPPrefix, &ulChildID)) {
+            Node_hasChild(oNCurr, oPPrefix, &ulChildID, TRUE)) {
          /* go to that child and continue with next prefix */
          Path_free(oPPrefix);
          oPPrefix = NULL;

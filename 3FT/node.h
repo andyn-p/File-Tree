@@ -49,7 +49,7 @@ Path_T Node_getPath(Node_T oNNode);
   child _would_ have if inserted.
 */
 boolean Node_hasChild(Node_T oNParent, Path_T oPPath,
-                         size_t *pulChildID);
+                         size_t *pulChildID, boolean isDir);
 
 /* Returns the number of children that oNParent has. */
 size_t Node_getNumChildren(Node_T oNParent);
