@@ -8,7 +8,6 @@
 #include "ft.h"
 #include "node.h"
 #include "dynarray.h"
-#include "checker.h"
 
 /* 1. a flag for being in an initialized state (TRUE) or not (FALSE) */
 static boolean bIsInitialized;
@@ -353,7 +352,6 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
          Path_free(oPPath);
          if(oNFirstNew != NULL)
             (void) Node_free(oNFirstNew);
-         assert(CheckerFT_isValid(bIsInitialized, oNRoot, ulCount));
          return iStatus;
       }
 
@@ -378,7 +376,6 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
          Path_free(oPPrefix);
          if(oNFirstNew != NULL)
             (void) Node_free(oNFirstNew);
-         assert(CheckerFT_isValid(bIsInitialized, oNRoot, ulCount));
          return iStatus;
       }
 
