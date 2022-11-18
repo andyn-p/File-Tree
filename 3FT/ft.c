@@ -35,7 +35,6 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
    size_t ulDepth;
    size_t i;
    size_t ulChildID;
-   boolean canGetChild;
 
    assert(oPPath != NULL);
    assert(poNFurthest != NULL);
@@ -63,41 +62,21 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
    oNCurr = oNRoot;
    ulDepth = Path_getDepth(oPPath);
 
-   fprintf(stderr, "depth %li\n", ulDepth);
    for(i = 2; i <= ulDepth; i++) {
       iStatus = Path_prefix(oPPath, i, &oPPrefix);
       if(iStatus != SUCCESS) {
          *poNFurthest = NULL;
          return iStatus;
       }
-      /* check if node is dir, then check its children */
-      /*
+      /* check if node is dir, then check its children
       fprintf(stderr, "%s | %s\n", Path_getPathname(Node_getPath(oNCurr)), Path_getPathname(oPPrefix));
-      fprintf(stderr, "%i\n", Node_hasChild(oNCurr, oPPrefix, &ulChildID, isDir));
+      fprintf(stderr, "%i | %li\n", Node_hasChild(oNCurr, oPPrefix, &ulChildID, isDir), ulChildID);
       fprintf(stderr, "%li\n", i);
       */
 
-      canGetChild = FALSE;
-      /* travelling down, child should be a directory */
-      if (Node_isDirectory(oNCurr) && i < ulDepth &&
-         Node_hasChild(oNCurr, oPPrefix, &ulChildID, TRUE)) {
-         canGetChild = TRUE;
-      }
-
-      /* at dir above desired node, check for desired node */
-      else if (Node_isDirectory(oNCurr) && i == ulDepth &&
-               Node_hasChild(oNCurr, oPPrefix, &ulChildID, isDir)) {
-         canGetChild = TRUE;
-      }
-
-      else {
-         /* oNCurr doesn't have child with path oPPrefix:
-            this is as far as we can go */
-         break;
-      }
-
-
-      if(canGetChild) {
+     if(Node_isDirectory(oNCurr) &&
+            (Node_hasChild(oNCurr, oPPrefix, &ulChildID, TRUE) ||
+            Node_hasChild(oNCurr, oPPrefix, &ulChildID, FALSE))) {
          /* go to that child and continue with next prefix */
          Path_free(oPPrefix);
          oPPrefix = NULL;
@@ -107,6 +86,11 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
             return iStatus;
          }
          oNCurr = oNChild;
+      }
+      else {
+         /* oNCurr doesn't have child with path oPPrefix:
+            this is as far as we can go */
+         break;
       }
    }
 
@@ -194,6 +178,11 @@ int FT_insertDir(const char *pcPath) {
    {
       Path_free(oPPath);
       return iStatus;
+   }
+
+   if (oNCurr != NULL && !Node_isDirectory(oNCurr)) {
+      Path_free(oPPath);
+      return NOT_A_DIRECTORY;
    }
 
    /* no ancestor node found, so if root is not NULL,

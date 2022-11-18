@@ -5,7 +5,6 @@
 
 #include "node.h"
 #include "dynarray.h"
-#include "checker.h"
 
 struct node {
    Path_T   oPPath;   /* node's path */
@@ -28,7 +27,7 @@ static int Node_compareDirString(const Node_T oNFirst,
 
    if (oNFirst->isDir)
       return Path_compareString(oNFirst->oPPath, pcSecond);
-   return 1;
+   return -1; /* -1 means file before dir */
 }
 
 static int Node_compareFileString(const Node_T oNFirst,
@@ -38,7 +37,7 @@ static int Node_compareFileString(const Node_T oNFirst,
 
    if (!oNFirst->isDir)
       return Path_compareString(oNFirst->oPPath, pcSecond);
-   return -1;
+   return 1; /* 1 means file before dir */
 }
 
 /*
@@ -69,7 +68,6 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
    int iStatus;
 
    assert(oPPath != NULL);
-   assert(oNParent == NULL || CheckerFT_Node_isValid(oNParent));
 
    /* allocate space for a new node */
    psNew = malloc(sizeof(struct node));
@@ -181,8 +179,6 @@ int Node_new(Path_T oPPath, Node_T oNParent, boolean isDir,
 
    *poNResult = psNew;
 
-   assert(oNParent == NULL || CheckerFT_Node_isValid(oNParent));
-   assert(CheckerFT_Node_isValid(*poNResult));
    return SUCCESS;
 }
 
@@ -191,8 +187,6 @@ size_t Node_free(Node_T oNNode) {
    size_t ulCount = 0;
 
    assert(oNNode != NULL);
-   fprintf(stderr, "starting: %s\n", Path_getPathname(oNNode->oPPath));
-   assert(CheckerFT_Node_isValid(oNNode));
 
    /* remove from parent's list */
    if(oNNode->oNParent != NULL) {
@@ -280,6 +274,9 @@ Node_T Node_getParent(Node_T oNNode) {
 int Node_compare(Node_T oNFirst, Node_T oNSecond) {
    assert(oNFirst != NULL);
    assert(oNSecond != NULL);
+
+   if (oNFirst->isDir && !oNSecond->isDir) return 1;
+   if (!oNFirst->isDir && oNSecond->isDir) return -1;
 
    return Path_comparePath(oNFirst->oPPath, oNSecond->oPPath);
 }
