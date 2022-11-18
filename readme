@@ -17,7 +17,15 @@ information given in the "Policies" web page (also available on armlab
 in the file ~cos217/AuthorizedSourcesList ) to this section of the
 readme file, and edit it as appropriate.
 
+The course's lectures.
 
+The course's precepts.
+
+The course's website.
+
+The course's current staff members outside of class time through office hours.
+
+The course's current staff members outside of class time through Ed.
 
 ------------------------------------------------------------------------
 Student 2: What authorized sources of information did you use to
@@ -26,7 +34,15 @@ information given in the "Policies" web page (also available on armlab
 in the file ~cos217/AuthorizedSourcesList ) to this section of the
 readme file, and edit it as appropriate.
 
+The course's lectures.
 
+The course's precepts.
+
+The course's website.
+
+The course's current staff members outside of class time through office hours.
+
+The course's current staff members outside of class time through Ed.
 
 ------------------------------------------------------------------------
 Student 1: What unauthorized sources of information did you use to
@@ -40,7 +56,7 @@ nature of the interaction, may additionally require the interaction
 being reported to the Committee on Discipline. Write "None" if you used
 no unauthorized sources of information.
 
-
+None
 
 ------------------------------------------------------------------------
 Student 2: What unauthorized sources of information did you use to
@@ -54,18 +70,19 @@ nature of the interaction, may additionally require the interaction
 being reported to the Committee on Discipline. Write "None" if you used
 no unauthorized sources of information.
 
-
+None
 
 ------------------------------------------------------------------------
 Student 1: What is your assessment of the assignment? Was it helpful?
 Was it fun?
 
-
+it was a great assignment
 
 ------------------------------------------------------------------------
 Student 2: What is your assessment of the assignment? Was it helpful?
 Was it fun?
 
+This assignment took longer than we thought it would, but it was helpful.
 
 
 ------------------------------------------------------------------------
@@ -81,7 +98,22 @@ your disagreements with them? Copy the splint warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
+nodeDTGood.c:148:48: Variable ulIndex used before definition
+An rvalue is used that may not be initialized to a value on some
+execution path. (Use -usedef to inhibit warning)
+nodeDTGood.c:180:35: Variable ulIndex used before definition
 
+   ulIndex has its value changed when passed into a function called
+   here. Therefore, its value will be overwritten if it is defined
+   beforehand.
+
+path.h:94:13: Function exported but not used outside path:
+Path_getComponent
+A declaration is exported, but not used outside this module. Declaration
+can use static qualifier. (Use -exportlocal to inhibit warning)
+path.c:316:1: Definition of Path_getComponent
+
+   We were not expected to modify the path.c and path.h.
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on checkerDT.c, and what are your
@@ -89,7 +121,16 @@ disagreements with them? Copy the critTer warnings here, and express
 your disagreement after each warning. If there are no warnings, then
 write "None."
 
+checkerDT.c: line 81: medium priority:
+Do you want to validate 'treeCount' through an assert?
 
+   No since we implemented this variable.
+
+checkerDT.c: line 125: low priority:
+This area is deeply nested at level 4, consider refactoring
+
+   Although we could refactor the if statement, it would be much messier
+   to do so, compared to simply leaving it nested as is.
 
 ------------------------------------------------------------------------
 What warnings does splint generate on your Part 3 code, and what are
@@ -97,7 +138,31 @@ your disagreements with them? Copy the splint warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
+ft.c:82:42: Variable ulChildID used before definition
+An rvalue is used that may not be initialized to a value on some
+execution path. (Use -usedef to inhibit warning)
 
+   ulChildID, while not defined in FT_travserPath(), its value is set
+   when running the Node_hasChild() in FT_traversePath(). There is no
+   point to define them outside before calling the node methods as the
+   node methods would override them.
+
+node.c:119:21: Variable ulIndex used before definition
+node.c:171:48: Variable ulIndex used before definition
+
+   For both these, the same idea as above applies.
+
+node.c:199:35: Variable ulIndex used before definition
+
+   Same as above.
+
+ath.h:94:13: Function exported but not used outside path:
+Path_getComponent
+A declaration is exported, but not used outside this module. Declaration
+can use static qualifier. (Use -exportlocal to inhibit warning)
+path.c:316:1: Definition of Path_getComponent
+
+   We were not expected to modify the path.c and path.h.
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on your Part 3 code, and what are
@@ -105,7 +170,46 @@ your disagreements with them? Copy the critTer warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
+ft.c: line 587: low priority:
+A file should contain no more than 15 functions;
+this file contains 17 functions
 
+   All the functions in the file are needed and help with
+   implementation.
+
+ft.c: line 292: medium priority:
+Do you want to validate 'pvContents' through an assert?
+ft.c: line 441: medium priority:
+Do you want to validate 'pvNewContents' through an assert?
+
+   For these, we do not need to assert, and should not, since
+   contents of a file can be null.
+
+ft.c: line 586: low priority:
+A source code file should contain fewer than 500 lines;
+this file contains 587 lines
+
+   The implementation is necessary.
+
+node.c: line 337: low priority:
+A file should contain no more than 15 functions;
+this file contains 16 functions
+
+   All the functions in the file are needed and help with
+   implementation.
+
+node.c: line 94: medium priority:
+Do you want to validate 'contents' through an assert?
+node.c: line 328: medium priority:
+Do you want to validate 'pvContents' through an assert?
+
+   File contents can be null.
+
+node.c: line 94: medium priority:
+Do you want to validate 'poNResult' through an assert?
+
+   poNResult is a pointer that the function sets to point to some node,
+   so upon calling the function, poNResult can be null.
 
 ------------------------------------------------------------------------
 For each of the five faulty BDT implementations required by Step
@@ -123,9 +227,9 @@ the error manifests itself or is "noticed" by the client.
 ---------------------------------------------------------------
          ./bdtBad3       BDT_insert
 ---------------------------------------------------------------
-         ./bdtBad4       BDT_insert*************
+         ./bdtBad4       BDT_insert
 ---------------------------------------------------------------
-         ./bdtBad5       BDT_rm*****************
+         ./bdtBad5       BDT_rm
 ===============================================================
 
 ------------------------------------------------------------------------
@@ -140,5 +244,8 @@ parameter.
 
 DT_insert is too long, should modularize the method to use more modular
 functions.
+
+In path.c, the while loop in Path_split consists of too many lines,
+consider modularizing.
 
 ------------------------------------------------------------------------

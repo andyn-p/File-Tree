@@ -1,3 +1,8 @@
+/*--------------------------------------------------------------------*/
+/* ft.c                                                               */
+/* Author: Andy Nguyen and Icey Ai                                    */
+/*--------------------------------------------------------------------*/
+
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
@@ -25,8 +30,7 @@ static size_t ulCount;
   * CONFLICTING_PATH if the root's path is not a prefix of oPPath
   * MEMORY_ERROR if memory could not be allocated to complete request
 */
-static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
-                           boolean isDir) {
+static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest) {
    int iStatus;
    Path_T oPPrefix = NULL;
    Node_T oNCurr;
@@ -108,8 +112,7 @@ static int FT_traversePath(Path_T oPPath, Node_T *poNFurthest,
   * NO_SUCH_PATH if no node with pcPath exists in the hierarchy
   * MEMORY_ERROR if memory could not be allocated to complete request
  */
-static int FT_findNode(const char *pcPath, Node_T *poNResult,
-                        boolean isDir) {
+static int FT_findNode(const char *pcPath, Node_T *poNResult) {
    Path_T oPPath = NULL;
    Node_T oNFound = NULL;
    int iStatus;
@@ -128,7 +131,7 @@ static int FT_findNode(const char *pcPath, Node_T *poNResult,
       return iStatus;
    }
 
-   iStatus = FT_traversePath(oPPath, &oNFound, isDir);
+   iStatus = FT_traversePath(oPPath, &oNFound);
    if(iStatus != SUCCESS)
    {
       Path_free(oPPath);
@@ -172,7 +175,7 @@ int FT_insertDir(const char *pcPath) {
       return iStatus;
 
    /* find the closest ancestor of oPPath already in the tree */
-   iStatus = FT_traversePath(oPPath, &oNCurr, TRUE);
+   iStatus = FT_traversePath(oPPath, &oNCurr);
    if(iStatus != SUCCESS)
    {
       Path_free(oPPath);
@@ -209,7 +212,6 @@ int FT_insertDir(const char *pcPath) {
    while(ulIndex <= ulDepth) {
       Path_T oPPrefix = NULL;
       Node_T oNNewNode = NULL;
-
       /* generate a Path_T for this level */
       iStatus = Path_prefix(oPPath, ulIndex, &oPPrefix);
       if(iStatus != SUCCESS) {
@@ -218,14 +220,12 @@ int FT_insertDir(const char *pcPath) {
             (void) Node_free(oNFirstNew);
          return iStatus;
       }
-
       /* ensure that current level is not a file */
       if (ulIndex == ulDepth && oNRoot != NULL &&
             !Node_isDirectory(oNCurr)) {
          Path_free(oPPath);
          return NOT_A_DIRECTORY;
       }
-
       /* insert the new node for this level */
       iStatus = Node_new(oPPrefix, oNCurr, TRUE, NULL, 0, &oNNewNode);
       if(iStatus != SUCCESS) {
@@ -235,7 +235,6 @@ int FT_insertDir(const char *pcPath) {
             (void) Node_free(oNFirstNew);
          return iStatus;
       }
-
       /* set up for next level */
       Path_free(oPPrefix);
       oNCurr = oNNewNode;
@@ -260,7 +259,7 @@ boolean FT_containsDir(const char *pcPath) {
 
    assert(pcPath != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, TRUE);
+   iStatus = FT_findNode(pcPath, &oNFound);
    if (oNFound != NULL && !Node_isDirectory(oNFound)) {
       iStatus = NOT_A_DIRECTORY;
       oNFound = NULL;
@@ -274,7 +273,7 @@ int FT_rmDir(const char *pcPath) {
 
    assert(pcPath != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, TRUE);
+   iStatus = FT_findNode(pcPath, &oNFound);
 
    if (oNFound != NULL && !Node_isDirectory(oNFound))
       return NOT_A_DIRECTORY;
@@ -309,7 +308,7 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
       return iStatus;
 
    /* find the closest ancestor of oPPath already in the tree */
-   iStatus = FT_traversePath(oPPath, &oNCurr, FALSE);
+   iStatus = FT_traversePath(oPPath, &oNCurr);
    if(iStatus != SUCCESS)
    {
       Path_free(oPPath);
@@ -345,7 +344,6 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
    while(ulIndex <= ulDepth) {
       Path_T oPPrefix = NULL;
       Node_T oNNewNode = NULL;
-
       /* generate a Path_T for this level */
       iStatus = Path_prefix(oPPath, ulIndex, &oPPrefix);
       if(iStatus != SUCCESS) {
@@ -354,20 +352,13 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
             (void) Node_free(oNFirstNew);
          return iStatus;
       }
-
-      /* insert the new node for this level */
-      /* create dirs on the way down */
-      if (ulIndex < ulDepth) {
+      if (ulIndex < ulDepth) { /* create dirs on the way down */
          iStatus = Node_new(oPPrefix, oNCurr, TRUE, NULL, 0,
             &oNNewNode);
-      }
-      /* make sure last node is dir */
-      else if (!Node_isDirectory(oNCurr)) {
+      } else if (!Node_isDirectory(oNCurr)) { /* last node is dir */
          Path_free(oPPath);
          return NOT_A_DIRECTORY;
-      }
-      /* finally add new file */
-      else {
+      } else { /* add new file */
          iStatus = Node_new(oPPrefix, oNCurr, FALSE, pvContents,
             ulLength, &oNNewNode);
       }
@@ -378,7 +369,6 @@ int FT_insertFile(const char *pcPath, void *pvContents, size_t ulLength)
             (void) Node_free(oNFirstNew);
          return iStatus;
       }
-
       /* set up for next level */
       Path_free(oPPrefix);
       oNCurr = oNNewNode;
@@ -403,7 +393,7 @@ boolean FT_containsFile(const char *pcPath) {
 
    assert(pcPath != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, FALSE);
+   iStatus = FT_findNode(pcPath, &oNFound);
    if (oNFound != NULL && Node_isDirectory(oNFound)) {
       iStatus = NOT_A_FILE;
       oNFound = NULL;
@@ -418,7 +408,7 @@ int FT_rmFile(const char *pcPath) {
 
    assert(pcPath != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, FALSE);
+   iStatus = FT_findNode(pcPath, &oNFound);
 
    if (oNFound != NULL && Node_isDirectory(oNFound))
       return NOT_A_FILE;
@@ -439,7 +429,7 @@ void *FT_getFileContents(const char *pcPath) {
 
    assert(pcPath != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, FALSE);
+   iStatus = FT_findNode(pcPath, &oNFound);
 
    if (iStatus != SUCCESS || Node_isDirectory(oNFound))
       return NULL;
@@ -454,7 +444,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 
    assert(pcPath != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, FALSE);
+   iStatus = FT_findNode(pcPath, &oNFound);
 
    if (iStatus != SUCCESS || Node_isDirectory(oNFound))
        return NULL;
@@ -467,8 +457,10 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
    Node_T oNFound = NULL;
 
    assert(pcPath != NULL);
+   assert(pbIsFile != NULL);
+   assert(pulSize != NULL);
 
-   iStatus = FT_findNode(pcPath, &oNFound, !pbIsFile);
+   iStatus = FT_findNode(pcPath, &oNFound);
 
    if (iStatus != SUCCESS)
       return iStatus;

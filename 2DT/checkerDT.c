@@ -74,6 +74,9 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
    Returns FALSE if a broken invariant is found and
    returns TRUE otherwise.
 
+   treeCount refers to the current number of nodes within the tree.
+   Each node increments treeCount.
+
    You may want to change this function's return type or
    parameter list to facilitate constructing your checks.
    If you do, you should update this function comment.

@@ -1,3 +1,8 @@
+/*--------------------------------------------------------------------*/
+/* node.c                                                             */
+/* Author: Andy Nguyen and Icey Ai                                    */
+/*--------------------------------------------------------------------*/
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -6,17 +11,23 @@
 #include "node.h"
 #include "dynarray.h"
 
+/* a node in a ft */
 struct node {
-   Path_T   oPPath;   /* node's path */
-   Node_T   oNParent; /* node parent */
-   boolean  isDir;    /* boolean of if node is dir, else is file */
-   size_t   ulLength; /* length of file contents if is file */
-   void    *contents; /* either children of dir, or contents of file */
+   /* node's path */
+   Path_T   oPPath;
+   /* node parent */
+   Node_T   oNParent;
+   /* boolean of if node is dir, else is file */
+   boolean  isDir;
+   /* length of file contents if is file */
+   size_t   ulLength;
+   /* either children of dir, or contents of file */
+   void    *contents;
 };
 
 /*
   Compares the string representation of oNfirst with a string
-  pcSecond representing a node's path.
+  pcSecond representing a node's path. pcSecond is a dir
   Returns <0, 0, or >0 if oNFirst is "less than", "equal to", or
   "greater than" pcSecond, respectively.
 */
@@ -30,6 +41,12 @@ static int Node_compareDirString(const Node_T oNFirst,
    return -1; /* -1 means file before dir */
 }
 
+/*
+  Compares the string representation of oNfirst with a string
+  pcSecond representing a node's path. pcSecond is a file
+  Returns <0, 0, or >0 if oNFirst is "less than", "equal to", or
+  "greater than" pcSecond, respectively.
+*/
 static int Node_compareFileString(const Node_T oNFirst,
                                   const char *pcSecond) {
    assert(oNFirst != NULL);
@@ -38,6 +55,22 @@ static int Node_compareFileString(const Node_T oNFirst,
    if (!oNFirst->isDir)
       return Path_compareString(oNFirst->oPPath, pcSecond);
    return 1; /* 1 means file before dir */
+}
+
+/*
+   Compares oNFirst and oNSecond's string representation as well as
+   node type.
+   Returns <0, 0, or >0 if oNFirst is "less than", "equal to", or
+  "greater than" pcSecond, respectively.
+*/
+static int Node_compare(Node_T oNFirst, Node_T oNSecond) {
+   assert(oNFirst != NULL);
+   assert(oNSecond != NULL);
+
+   if (oNFirst->isDir && !oNSecond->isDir) return 1;
+   if (!oNFirst->isDir && oNSecond->isDir) return -1;
+
+   return Path_comparePath(oNFirst->oPPath, oNSecond->oPPath);
 }
 
 /*
@@ -269,16 +302,6 @@ Node_T Node_getParent(Node_T oNNode) {
    assert(oNNode != NULL);
 
    return oNNode->oNParent;
-}
-
-int Node_compare(Node_T oNFirst, Node_T oNSecond) {
-   assert(oNFirst != NULL);
-   assert(oNSecond != NULL);
-
-   if (oNFirst->isDir && !oNSecond->isDir) return 1;
-   if (!oNFirst->isDir && oNSecond->isDir) return -1;
-
-   return Path_comparePath(oNFirst->oPPath, oNSecond->oPPath);
 }
 
 char *Node_toString(Node_T oNNode) {
